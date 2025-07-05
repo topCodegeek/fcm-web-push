@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Document</title>
+</head>
+<body>
+     
+     <button id="enable-notifications" style="display: none;">Enable notifications</button>
+     <script type="module">
+
+          import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+          import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-messaging.js";
+
+          const firebaseConfig = {
+               // Paste your web app credentials from firebase app setings >> 'general' tab.
+          };
+
+          // Initialize Firebase
+          const app = initializeApp(firebaseConfig);
+          const messaging = getMessaging(app);
+          const vapidKey = "<your-vapid-key>"; // From app settings >> 'cloud messaging' tab >> key pair. 
+          const btn = document.getElementById('enable-notifications');
+
+          const requestAndSendToken = (registration) => {
+               getToken(messaging, { vapidKey, serviceWorkerRegistration: registration })
+               .then((token) => {
+               if (token) {
+                    console.log("FCM Token:", token);
+               } else {
+                    console.warn("No token available.");
+               }
+               })
+               .catch(err => console.error("Token error:", err));
+          };
+
+          if ('serviceWorker' in navigator) {
+               navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                    .then((reg) => {
+                    console.log('Service Worker registered');
+          
+               if (Notification.permission === 'granted') {
+                    requestAndSendToken(reg);
+               } else if (Notification.permission !== 'denied') {
+                    btn.style.display = 'inline-block';
+                    btn.addEventListener('click', () => {
+                    Notification.requestPermission().then(permission => {
+                         if (permission === 'granted') requestAndSendToken(reg);
+                         else console.warn("Permission denied by user.");
+                    });
+                    });
+               } else {
+                    console.warn("Notifications denied earlier.");
+               }
+               })
+               .catch(err => console.error("SW registration failed:", err));
+          }
+
+</script>
+
+</body>
+</html>
