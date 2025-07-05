@@ -4,6 +4,7 @@ This repo contains an `index.html` template that contains a javascript client, a
 ## Here's how to use this: ##
 - This doesn't contain your credentials, so create a Firebase project and web app on [firebase console](https://console.firebase.google.com).
 - Fill in your credentials: App configuration in the template and a service worker and a VAPID key in the template.
+- You need to return the service worker file on `your_website.com/firebase-messaging-sw.js`.
 - Reload the page to get a token.
 - Send test messages to any token from firebase as shown in the tutorial.
 
