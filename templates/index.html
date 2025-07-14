@@ -23,11 +23,33 @@
           const vapidKey = "<your-vapid-key>"; // From app settings >> 'cloud messaging' tab >> key pair. 
           const btn = document.getElementById('enable-notifications');
 
+          // Get CSRF token from cookie
+          const getCSRF = () => {
+               const match = document.cookie.match(/csrftoken=([^;]+)/);
+               return match ? match[1] : null;
+          };
+
+          const saveToken = (token) => {
+          fetch('save-fcm-token/', { // Here update the API endpoint as per your setup.
+               method: 'POST',
+               headers: {
+               'Content-Type': 'application/json',
+               'X-CSRFToken': getCSRF(),
+               },
+               credentials: 'include',
+               body: JSON.stringify({ token })
+          })
+          .then(res => res.json())
+          .then(data => console.log('Token saved:', data))
+          .catch(err => console.error('Save failed:', err));
+          };
+
           const requestAndSendToken = (registration) => {
                getToken(messaging, { vapidKey, serviceWorkerRegistration: registration })
                .then((token) => {
                if (token) {
                     console.log("FCM Token:", token);
+                    saveToken(token);
                } else {
                     console.warn("No token available.");
                }
